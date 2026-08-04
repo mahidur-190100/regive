@@ -25,24 +25,35 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginWithEmail() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    setState(() => _errorMessage = null);
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Please fill in all fields.');
+      return;
+    }
+    if (!email.contains('@') || !email.contains('.')) {
+      setState(() => _errorMessage = 'Email must contain "@" and a valid domain.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
 
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+        email: email,
+        password: password,
       );
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage = _friendlyError(e.code);
-      });
+      setState(() => _errorMessage = _friendlyError(e.code));
+    } catch (e) {
+      setState(() => _errorMessage = 'Something went wrong. Please try again.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -83,39 +94,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 32),
-
-                  // Email field
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'Email address',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.grey),
-                      ),
-                    ),
+                    decoration: _fieldDecoration('Email address'),
                   ),
                   const SizedBox(height: 12),
-
-                  // Password field
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.grey),
-                      ),
-                    ),
+                    decoration: _fieldDecoration('Password'),
                   ),
-
-                  // Forgot password link
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -132,7 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 4),
                     Text(
@@ -141,8 +129,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                   ],
-
-                  // Log In with Email button
                   ElevatedButton(
                     onPressed: _isLoading ? null : _loginWithEmail,
                     style: ElevatedButton.styleFrom(
@@ -162,11 +148,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     )
                         : const Text(
-                      'Log In with Email',
+                      'Log In',
                       style: TextStyle(color: Colors.white, fontSize: 15),
                     ),
                   ),
-
                   const SizedBox(height: 24),
                   const Row(
                     children: [
@@ -182,12 +167,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // Google Sign-In button
                   OutlinedButton.icon(
-                    onPressed: () {
-                      // Google Sign-In wired in next step
-                    },
+                    onPressed: () {},
                     icon: const Icon(Icons.g_mobiledata, size: 24),
                     label: const Text('Sign in with Google'),
                     style: OutlinedButton.styleFrom(
@@ -198,12 +179,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-
-                  // Apple Sign-In button
                   OutlinedButton.icon(
-                    onPressed: () {
-                      // Apple Sign-In (requires Apple Developer account)
-                    },
+                    onPressed: () {},
                     icon: const Icon(Icons.apple, size: 20),
                     label: const Text('Sign in with Apple'),
                     style: OutlinedButton.styleFrom(
@@ -213,10 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 28),
-
-                  // Create ID
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -227,9 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       GestureDetector(
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SignUpScreen(),
-                            ),
+                            MaterialPageRoute(builder: (_) => const SignUpScreen()),
                           );
                         },
                         child: const Text(
@@ -249,6 +221,18 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _fieldDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.grey),
       ),
     );
   }
