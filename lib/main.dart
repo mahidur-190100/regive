@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,24 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ReGive',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('ReGive')),
-      body: const Center(
-        child: Text('Firebase Connected ✅'),
-      ),
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: const LoginScreen(),
     );
   }
 }
