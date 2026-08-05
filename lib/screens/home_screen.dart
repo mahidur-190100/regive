@@ -7,6 +7,7 @@ import '../services/location_service.dart';
 import 'login_screen.dart';
 import 'add_item_screen.dart';
 import 'item_detail_screen.dart';
+import 'my_listings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,6 +62,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Nearby Items'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.list_alt),
+            tooltip: 'My Listings',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const MyListingsScreen()),
+              );
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: TextButton(
