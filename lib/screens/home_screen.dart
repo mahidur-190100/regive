@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _loadingLocation = true;
   String _selectedCategory = 'All';
   String _searchQuery = '';
-  double _maxDistanceMiles = 50; // default wide radius
+  final double _maxDistanceMiles = 50;
 
   final List<String> _categories = [
     'All',
@@ -81,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          // Search bar
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
@@ -100,8 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
-
-          // Category filter chips
           SizedBox(
             height: 40,
             child: ListView(
@@ -126,7 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 8),
-
           if (!_loadingLocation && _currentPosition == null)
             Container(
               width: double.infinity,
@@ -138,8 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 textAlign: TextAlign.center,
               ),
             ),
-
-          // Item grid
           Expanded(
             child: _loadingLocation
                 ? const Center(child: CircularProgressIndicator())
@@ -151,37 +145,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Center(
-                      child: Text('Error: ${snapshot.error}'));
+                  return Center(child: Text('Error: ${snapshot.error}'));
                 }
                 if (!snapshot.hasData) {
-                  return const Center(
-                      child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 var items = snapshot.data!.docs
                     .map((doc) => Item.fromFirestore(doc))
                     .toList();
 
-                // Filter by category
                 if (_selectedCategory != 'All') {
                   items = items
                       .where((i) => i.category == _selectedCategory)
                       .toList();
                 }
 
-                // Filter by search
                 if (_searchQuery.isNotEmpty) {
                   items = items
                       .where((i) =>
                   i.title.toLowerCase().contains(_searchQuery) ||
-                      i.description
-                          .toLowerCase()
-                          .contains(_searchQuery))
+                      i.description.toLowerCase().contains(_searchQuery))
                       .toList();
                 }
 
-                // Compute distance + filter/sort if location available
                 List<MapEntry<Item, double>> itemsWithDistance = [];
                 if (_currentPosition != null) {
                   itemsWithDistance = items.map((item) {
@@ -268,8 +255,7 @@ class _ItemCard extends StatelessWidget {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(10)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
                 child: item.imageUrl != null
                     ? Image.network(item.imageUrl!, fit: BoxFit.cover, width: double.infinity)
                     : Container(
