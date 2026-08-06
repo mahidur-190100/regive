@@ -239,10 +239,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           onPressed: () => _updateStatus('given'),
                         ),
                         const SizedBox(height: 10),
-                        _actionButton(
-                          label: 'Cancel Claim (make Available again)',
-                          color: const Color(0xFF2F8F5B),
-                          onPressed: () => _updateStatus('available', claimedBy: null),
+                        Text(
+                          'Waiting for the claimer to confirm or cancel.',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     )
