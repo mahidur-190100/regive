@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/item.dart';
 import '../services/location_service.dart';
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = 'All';
   String _searchQuery = '';
   final double _maxDistanceMiles = 50;
+  bool _nearbyOnly = false;
 
   final List<String> _categories = [
     'All',
@@ -60,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text('Nearby Items'),
+        title: const Text('ReGive'),
         actions: [
           IconButton(
             icon: const Icon(Icons.list_alt),
@@ -114,22 +116,45 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: _categories.map((cat) {
-                final isSelected = cat == _selectedCategory;
-                return Padding(
+              children: [
+                Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(cat),
-                    selected: isSelected,
-                    onSelected: (_) => setState(() => _selectedCategory = cat),
-                    selectedColor: Colors.black,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
-                      fontSize: 12,
+                  child: FilterChip(
+                    label: const Text('Nearby'),
+                    avatar: Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: _nearbyOnly ? Colors.white : const Color(0xFF3F65B0),
                     ),
+                    selected: _nearbyOnly,
+                    onSelected: (value) => setState(() => _nearbyOnly = value),
+                    selectedColor: const Color(0xFF3F65B0),
+                    labelStyle: TextStyle(
+                      color: _nearbyOnly ? Colors.white : const Color(0xFF3F65B0),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    backgroundColor: const Color(0xFF3F65B0).withOpacity(0.08),
+                    side: BorderSide(color: const Color(0xFF3F65B0).withOpacity(0.4)),
                   ),
-                );
-              }).toList(),
+                ),
+                ..._categories.map((cat) {
+                  final isSelected = cat == _selectedCategory;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(cat),
+                      selected: isSelected,
+                      onSelected: (_) => setState(() => _selectedCategory = cat),
+                      selectedColor: Colors.black,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
+                        fontSize: 12,
+                      ),
+                    ),
+                  );
+                }),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -139,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.orange.shade100,
               padding: const EdgeInsets.all(8),
               child: const Text(
-                'Location permission not granted — showing all items without distance sorting.',
+                'Location permission not granted — distance info unavailable.',
                 style: TextStyle(fontSize: 12),
                 textAlign: TextAlign.center,
               ),
@@ -147,82 +172,132 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: _loadingLocation
                 ? const Center(child: CircularProgressIndicator())
-                : StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('items')
-                  .where('status', isEqualTo: 'available')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                var items = snapshot.data!.docs
-                    .map((doc) => Item.fromFirestore(doc))
-                    .toList();
-
-                if (_selectedCategory != 'All') {
-                  items = items
-                      .where((i) => i.category == _selectedCategory)
-                      .toList();
-                }
-
-                if (_searchQuery.isNotEmpty) {
-                  items = items
-                      .where((i) =>
-                  i.title.toLowerCase().contains(_searchQuery) ||
-                      i.description.toLowerCase().contains(_searchQuery))
-                      .toList();
-                }
-
-                List<MapEntry<Item, double>> itemsWithDistance = [];
-                if (_currentPosition != null) {
-                  itemsWithDistance = items.map((item) {
-                    final dist = LocationService.distanceInMiles(
-                      _currentPosition!.latitude,
-                      _currentPosition!.longitude,
-                      item.latitude,
-                      item.longitude,
+                : RefreshIndicator(
+              onRefresh: _loadLocation,
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('items')
+                    .where('status', isEqualTo: 'available')
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return ListView(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          child: Center(
+                            child: Text('Error: ${snapshot.error}'),
+                          ),
+                        ),
+                      ],
                     );
-                    return MapEntry(item, dist);
-                  }).where((entry) => entry.value <= _maxDistanceMiles).toList();
-                  itemsWithDistance.sort((a, b) => a.value.compareTo(b.value));
-                } else {
-                  itemsWithDistance =
-                      items.map((item) => MapEntry(item, -1.0)).toList();
-                }
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (itemsWithDistance.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No items found nearby.\nBe the first to list something!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
+                  var items = snapshot.data!.docs
+                      .map((doc) => Item.fromFirestore(doc))
+                      .toList();
+
+                  if (_selectedCategory != 'All') {
+                    items = items
+                        .where((i) => i.category == _selectedCategory)
+                        .toList();
+                  }
+
+                  if (_searchQuery.isNotEmpty) {
+                    items = items
+                        .where((i) =>
+                    i.title.toLowerCase().contains(_searchQuery) ||
+                        i.description.toLowerCase().contains(_searchQuery))
+                        .toList();
+                  }
+
+                  List<MapEntry<Item, double>> itemsWithDistance = [];
+                  if (_currentPosition != null) {
+                    itemsWithDistance = items.map((item) {
+                      final dist = LocationService.distanceInMiles(
+                        _currentPosition!.latitude,
+                        _currentPosition!.longitude,
+                        item.latitude,
+                        item.longitude,
+                      );
+                      return MapEntry(item, dist);
+                    }).toList();
+
+                    if (_nearbyOnly) {
+                      itemsWithDistance = itemsWithDistance
+                          .where((entry) => entry.value <= _maxDistanceMiles)
+                          .toList();
+                      itemsWithDistance.sort((a, b) => a.value.compareTo(b.value));
+                    }
+                  } else {
+                    itemsWithDistance =
+                        items.map((item) => MapEntry(item, -1.0)).toList();
+                  }
+
+                  if (itemsWithDistance.isEmpty) {
+                    return ListView(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.inventory_2_outlined,
+                                      size: 64, color: Colors.grey.shade400),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    _nearbyOnly
+                                        ? 'No items found nearby'
+                                        : 'No items listed yet',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    _nearbyOnly
+                                        ? 'Try turning off "Nearby" to see all listings.'
+                                        : 'Be the first to list something!',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.grey.shade600, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(12),
+                    gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.8,
                     ),
+                    itemCount: itemsWithDistance.length,
+                    itemBuilder: (context, index) {
+                      final item = itemsWithDistance[index].key;
+                      final distance = itemsWithDistance[index].value;
+                      return _ItemCard(item: item, distanceMiles: distance);
+                    },
                   );
-                }
-
-                return GridView.builder(
-                  padding: const EdgeInsets.all(12),
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.8,
-                  ),
-                  itemCount: itemsWithDistance.length,
-                  itemBuilder: (context, index) {
-                    final item = itemsWithDistance[index].key;
-                    final distance = itemsWithDistance[index].value;
-                    return _ItemCard(item: item, distanceMiles: distance);
-                  },
-                );
-              },
+                },
+              ),
             ),
           ),
         ],
@@ -267,7 +342,27 @@ class _ItemCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
                 child: item.imageUrl != null
-                    ? Image.network(item.imageUrl!, fit: BoxFit.cover, width: double.infinity)
+                    ? CachedNetworkImage(
+                  imageUrl: item.imageUrl!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey.shade100,
+                    child: const Center(
+                      child: SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey.shade200,
+                    child: const Center(
+                      child: Icon(Icons.broken_image, color: Colors.grey, size: 28),
+                    ),
+                  ),
+                )
                     : Container(
                   color: Colors.grey.shade200,
                   child: const Center(
