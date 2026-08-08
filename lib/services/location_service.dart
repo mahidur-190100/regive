@@ -1,58 +1,44 @@
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
+  /// Returns the real device GPS location, or null if unavailable.
+  /// No more silent fallback to a fixed city — if this returns null,
+  /// the calling screen must handle it (e.g. show an error, block listing).
   static Future<Position?> getCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('LOCATION: Services disabled, using fallback location.');
-        return _fallbackPosition();
+        print('LOCATION: Location services are disabled.');
+        return null;
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          print('LOCATION: Permission denied, using fallback location.');
-          return _fallbackPosition();
+          print('LOCATION: Permission denied by user.');
+          return null;
         }
       }
       if (permission == LocationPermission.deniedForever) {
-        print('LOCATION: Permission denied forever, using fallback location.');
-        return _fallbackPosition();
+        print('LOCATION: Permission denied forever.');
+        return null;
       }
 
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.medium,
       ).timeout(
-        const Duration(seconds: 8),
+        const Duration(seconds: 15),
         onTimeout: () {
-          print('LOCATION: GPS timed out, using fallback location.');
+          print('LOCATION: GPS timed out.');
           throw Exception('timeout');
         },
       );
       return position;
     } catch (e) {
-      print('LOCATION: Exception ($e), using fallback location.');
-      return _fallbackPosition();
+      print('LOCATION: Exception - $e');
+      return null;
     }
-  }
-
-  // Fallback location (Dhaka, Bangladesh) — used only when real GPS
-  // is unavailable, e.g. on emulators without a location fix set.
-  static Position _fallbackPosition() {
-    return Position(
-      latitude: 23.8103,
-      longitude: 90.4125,
-      timestamp: DateTime.now(),
-      accuracy: 0,
-      altitude: 0,
-      altitudeAccuracy: 0,
-      heading: 0,
-      headingAccuracy: 0,
-      speed: 0,
-      speedAccuracy: 0,
-    );
   }
 
   static double distanceInMiles(
