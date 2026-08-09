@@ -33,8 +33,7 @@ class MyListingsScreen extends StatelessWidget {
   }
 }
 
-// ---------------- Shared helpers ----------------
-
+// status
 Color _statusColor(String status) {
   switch (status) {
     case 'available':
@@ -103,7 +102,7 @@ Widget _itemLeadingImage(Item item) {
   );
 }
 
-// ---------------- Tab 1: Items I own (listed by me) ----------------
+// added by me
 
 class _MyOwnedItemsTab extends StatelessWidget {
   const _MyOwnedItemsTab();
@@ -196,7 +195,7 @@ class _MyOwnedItemsTab extends StatelessWidget {
   }
 }
 
-// ---------------- Tab 2: Items I've claimed from other users ----------------
+//claim form others
 
 class _MyClaimedItemsTab extends StatelessWidget {
   const _MyClaimedItemsTab();
@@ -248,8 +247,7 @@ class _MyClaimedItemsTab extends StatelessWidget {
                   ),
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                // Tapping goes to detail screen, where the "Unclaim" button
-                // is already correctly shown only to the user who claimed it.
+                // unclaim part
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),

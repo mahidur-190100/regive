@@ -1,9 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
-  /// Returns the real device GPS location, or null if unavailable.
-  /// No more silent fallback to a fixed city — if this returns null,
-  /// the calling screen must handle it (e.g. show an error, block listing).
+
   static Future<Position?> getCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
