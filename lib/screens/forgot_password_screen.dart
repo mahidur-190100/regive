@@ -7,7 +7,7 @@ class ForgotPasswordScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Forgot Password')),
-      body: const Center(child: Text('Forgot Password screen — coming next')),
+      body: const Center(child: Text('Forget password coming soon Please wait')),
     );
   }
 }
