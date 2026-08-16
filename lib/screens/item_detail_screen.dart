@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/item.dart';
+import 'chat_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
@@ -305,6 +306,27 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         : _disabledNotice('This item has already been claimed by someone.')
                   else
                     _disabledNotice('This item has been given away.'),
+
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            itemId: widget.item.itemId,
+                            itemTitle: title,
+                            otherUserId: widget.item.ownerId,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.chat_bubble_outline),
+                    label: const Text('Message Owner'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
                 ],
               ],
             ),

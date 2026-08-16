@@ -66,7 +66,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       setState(() => _pickedImage = File(picked.path));
     }
   }
-
+//image upload and get link
   Future<String?> _uploadToCloudinary(File imageFile) async {
     final url = Uri.parse(
         'https://api.cloudinary.com/v1_1/$cloudinaryCloudName/image/upload');
@@ -95,6 +95,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
 
     setState(() => _isSaving = true);
+    //ekhane item add
 
     try {
       final position = await LocationService.getCurrentLocation();

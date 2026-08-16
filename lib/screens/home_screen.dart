@@ -200,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   var items = snapshot.data!.docs
                       .map((doc) => Item.fromFirestore(doc))
                       .toList();
-
+//search option
                   if (_selectedCategory != 'All') {
                     items = items
                         .where((i) => i.category == _selectedCategory)

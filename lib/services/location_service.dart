@@ -1,6 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
+  //current gps location
 
   static Future<Position?> getCurrentLocation() async {
     try {
