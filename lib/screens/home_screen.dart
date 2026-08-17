@@ -9,6 +9,7 @@ import 'login_screen.dart';
 import 'add_item_screen.dart';
 import 'item_detail_screen.dart';
 import 'my_listings_screen.dart';
+import 'chat_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,6 +65,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('ReGive'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline),
+            tooltip: 'Messages',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ChatListScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.list_alt),
             tooltip: 'My Listings',
@@ -200,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   var items = snapshot.data!.docs
                       .map((doc) => Item.fromFirestore(doc))
                       .toList();
-//search option
+
                   if (_selectedCategory != 'All') {
                     items = items
                         .where((i) => i.category == _selectedCategory)

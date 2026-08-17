@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,21 +30,6 @@ class _ChatScreenState extends State<ChatScreen> {
     // Deterministic chat ID: same two users + same item = same chat, always
     final ids = [myId, widget.otherUserId]..sort();
     _chatId = '${widget.itemId}_${ids[0]}_${ids[1]}';
-    _ensureChatExists();
-  }
-
-  Future<void> _ensureChatExists() async {
-    final myId = FirebaseAuth.instance.currentUser!.uid;
-    final chatRef = FirebaseFirestore.instance.collection('chats').doc(_chatId);
-    final doc = await chatRef.get();
-    if (!doc.exists) {
-      await chatRef.set({
-        'itemId': widget.itemId,
-        'participantIds': [myId, widget.otherUserId],
-        'lastMessage': '',
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    }
   }
 
   Future<void> _sendMessage() async {
@@ -58,15 +42,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final chatRef = FirebaseFirestore.instance.collection('chats').doc(_chatId);
 
+    // Always ensure the parent chat document has its fields set (merge: true
+    // means this won't overwrite existing data, just fills in what's missing)
+    await chatRef.set({
+      'itemId': widget.itemId,
+      'participantIds': [myId, widget.otherUserId],
+      'lastMessage': text,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
     await chatRef.collection('messages').add({
       'senderId': myId,
       'text': text,
       'sentAt': FieldValue.serverTimestamp(),
-    });
-
-    await chatRef.update({
-      'lastMessage': text,
-      'updatedAt': FieldValue.serverTimestamp(),
     });
 
     if (mounted) setState(() => _isSending = false);
