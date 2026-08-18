@@ -42,8 +42,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final chatRef = FirebaseFirestore.instance.collection('chats').doc(_chatId);
 
-    // Always ensure the parent chat document has its fields set (merge: true
-    // means this won't overwrite existing data, just fills in what's missing)
     await chatRef.set({
       'itemId': widget.itemId,
       'participantIds': [myId, widget.otherUserId],
@@ -55,6 +53,17 @@ class _ChatScreenState extends State<ChatScreen> {
       'senderId': myId,
       'text': text,
       'sentAt': FieldValue.serverTimestamp(),
+    });
+
+    // Create a notification for the OTHER person
+    await FirebaseFirestore.instance.collection('notifications').add({
+      'userId': widget.otherUserId,
+      'type': 'message',
+      'body': '${widget.itemTitle}: $text',
+      'itemId': widget.itemId,
+      'fromUserId': myId,
+      'read': false,
+      'createdAt': FieldValue.serverTimestamp(),
     });
 
     if (mounted) setState(() => _isSending = false);

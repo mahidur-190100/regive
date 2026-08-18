@@ -16,6 +16,7 @@ class ItemDetailScreen extends StatefulWidget {
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   bool _isUpdating = false;
 
+//owner ship check
   bool get _isOwner {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     return currentUserId != null && currentUserId == widget.item.ownerId;
@@ -26,6 +27,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     return currentUserId != null && currentUserId == data['claimedBy'];
   }
 
+
+  //status chnage
   Future<void> _updateStatus(String newStatus, {String? claimedBy}) async {
     setState(() => _isUpdating = true);
     try {
@@ -36,6 +39,19 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         'status': newStatus,
         'claimedBy': claimedBy,
       });
+
+
+      if (newStatus == 'claimed') {
+        await FirebaseFirestore.instance.collection('notifications').add({
+          'userId': widget.item.ownerId,
+          'type': 'claimed',
+          'body': '"${widget.item.title}" was claimed!',
+          'itemId': widget.item.itemId,
+          'fromUserId': FirebaseAuth.instance.currentUser?.uid,
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

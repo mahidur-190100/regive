@@ -10,6 +10,7 @@ import 'add_item_screen.dart';
 import 'item_detail_screen.dart';
 import 'my_listings_screen.dart';
 import 'chat_list_screen.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,6 +66,44 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('ReGive'),
         actions: [
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('notifications')
+                .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                .where('read', isEqualTo: false)
+                .snapshots(),
+            builder: (context, snapshot) {
+              final unreadCount = snapshot.data?.docs.length ?? 0;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none),
+                    tooltip: 'Notifications',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                      );
+                    },
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(color: Colors.white, fontSize: 9),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline),
             tooltip: 'Messages',
@@ -185,6 +224,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 : RefreshIndicator(
               onRefresh: _loadLocation,
               child: StreamBuilder<QuerySnapshot>(
+
+
+                //availabale items shown
                 stream: FirebaseFirestore.instance
                     .collection('items')
                     .where('status', isEqualTo: 'available')
@@ -207,6 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return const Center(child: CircularProgressIndicator());
                   }
 
+                //search part
                   var items = snapshot.data!.docs
                       .map((doc) => Item.fromFirestore(doc))
                       .toList();
@@ -225,6 +268,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         .toList();
                   }
 
+
+                //nearby items
                   List<MapEntry<Item, double>> itemsWithDistance = [];
                   if (_currentPosition != null) {
                     itemsWithDistance = items.map((item) {

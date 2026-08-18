@@ -95,7 +95,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
 
     setState(() => _isSaving = true);
-    //ekhane item add
+
+
+    //item add
 
     try {
       final position = await LocationService.getCurrentLocation();

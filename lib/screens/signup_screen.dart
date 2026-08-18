@@ -79,12 +79,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // Sign out immediately so the new account doesn't stay auto-logged-in
       await FirebaseAuth.instance.signOut();
 
       if (!mounted) return;
 
-      // Show a success message, then return to Login screen
+      // return to Login screen
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Account created! Please log in.'),

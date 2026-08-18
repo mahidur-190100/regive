@@ -20,7 +20,7 @@ class LocationService {
         }
       }
       if (permission == LocationPermission.deniedForever) {
-        print('LOCATION: Permission denied forever.');
+
         return null;
       }
 
@@ -29,13 +29,13 @@ class LocationService {
       ).timeout(
         const Duration(seconds: 15),
         onTimeout: () {
-          print('LOCATION: GPS timed out.');
+
           throw Exception('timeout');
         },
       );
       return position;
     } catch (e) {
-      print('LOCATION: Exception - $e');
+
       return null;
     }
   }
