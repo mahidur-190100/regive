@@ -18,6 +18,8 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
+
+// chat id generation
 class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   late String _chatId;
@@ -32,16 +34,22 @@ class _ChatScreenState extends State<ChatScreen> {
     _chatId = '${widget.itemId}_${ids[0]}_${ids[1]}';
   }
 
+
+
+  // send message generation
   Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
+    // check current user
     final myId = FirebaseAuth.instance.currentUser!.uid;
     setState(() => _isSending = true);
     _messageController.clear();
 
     final chatRef = FirebaseFirestore.instance.collection('chats').doc(_chatId);
 
+
+    // chat document create
     await chatRef.set({
       'itemId': widget.itemId,
       'participantIds': [myId, widget.otherUserId],
@@ -49,11 +57,13 @@ class _ChatScreenState extends State<ChatScreen> {
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
+// add the actual message
     await chatRef.collection('messages').add({
       'senderId': myId,
       'text': text,
       'sentAt': FieldValue.serverTimestamp(),
     });
+
 
     // Create a notification for the OTHER person
     await FirebaseFirestore.instance.collection('notifications').add({
@@ -78,6 +88,8 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           Expanded(
+
+            // auto refres and show latest message by descending
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('chats')
@@ -92,9 +104,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 final messages = snapshot.data!.docs;
                 if (messages.isEmpty) {
                   return const Center(
-                    child: Text('Say hello 👋', style: TextStyle(color: Colors.grey)),
+                    child: Text('Say hello ', style: TextStyle(color: Colors.grey)),
                   );
                 }
+
+                // list kora latest msg  dekhabo last e
                 return ListView.builder(
                   reverse: true,
                   padding: const EdgeInsets.all(12),
@@ -102,6 +116,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemBuilder: (context, index) {
                     final data = messages[index].data() as Map<String, dynamic>;
                     final isMe = data['senderId'] == myId;
+
+                    //align kora left e other rigt e current user
                     return Align(
                       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(

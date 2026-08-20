@@ -20,11 +20,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
+
+  // valid check mail erroer found
   Future<void> _sendResetLink() async {
     setState(() => _errorMessage = null);
 
     final email = _emailController.text.trim();
 
+//validation check
     if (email.isEmpty) {
       setState(() => _errorMessage = 'Please enter your email address.');
       return;
@@ -35,6 +38,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
 
     setState(() => _isLoading = true);
+
+    //send the mail to the given mail
 
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
@@ -93,7 +98,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Enter the email associated with your account, and we\'ll send you a link to reset your password.',
+          'Enter the email associated with your account, and we will  send you a link to reset your password.',
           textAlign: TextAlign.center,
           style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
         ),
@@ -194,7 +199,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         TextButton(
           onPressed: () => setState(() => _linkSent = false),
           child: const Text(
-            'Didn\'t get it? Try again',
+            'Did not get it? Try again',
             style: TextStyle(color: Color(0xFF3F65B0)),
           ),
         ),

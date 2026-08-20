@@ -8,14 +8,20 @@ class ChatListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // check current user
     final myId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Messages')),
+
+      // chat crated in fireabse
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chats')
             .where('participantIds', arrayContains: myId)
+
+        // recent text er jonne decendong order
             .orderBy('updatedAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
@@ -49,6 +55,8 @@ class ChatListScreen extends StatelessWidget {
             );
           }
 
+
+          //show all chats
           return ListView.builder(
             itemCount: chats.length,
             itemBuilder: (context, index) {
@@ -59,6 +67,8 @@ class ChatListScreen extends StatelessWidget {
               final itemId = data['itemId'] ?? '';
 
               return FutureBuilder<DocumentSnapshot>(
+
+                // irems access koi
                 future: FirebaseFirestore.instance.collection('items').doc(itemId).get(),
                 builder: (context, itemSnapshot) {
                   String itemTitle = 'Item';
@@ -66,7 +76,7 @@ class ChatListScreen extends StatelessWidget {
                     final itemData = itemSnapshot.data!.data() as Map<String, dynamic>;
                     itemTitle = itemData['title'] ?? 'Item';
                   }
-
+                // display all of my chats
                   return ListTile(
                     leading: const CircleAvatar(
                       backgroundColor: Color(0xFF2F8F5B),
