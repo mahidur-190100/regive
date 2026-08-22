@@ -8,6 +8,7 @@ import '../models/item.dart';
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
+  //diffrent icon based notifiacation
   IconData _iconFor(String type) {
     switch (type) {
       case 'message':
@@ -22,14 +23,15 @@ class NotificationsScreen extends StatelessWidget {
   Color _colorFor(String type) {
     switch (type) {
       case 'message':
-        return const Color(0xFF3F65B0);
+        return const Color(0xFF3F65B0);  //blue coloe
       case 'claimed':
-        return const Color(0xFFC8963E);
+        return const Color(0xFFC8963E); // gold color
       default:
         return Colors.grey;
     }
   }
 
+  //notofication part
   Future<void> _markAllRead(String userId) async {
     final unread = await FirebaseFirestore.instance
         .collection('notifications')
@@ -50,10 +52,15 @@ class NotificationsScreen extends StatelessWidget {
     final itemId = data['itemId'];
     if (itemId == null) return;
 
+
+
+
+  // get full details of item
     final itemDoc = await FirebaseFirestore.instance.collection('items').doc(itemId).get();
     if (!itemDoc.exists || !context.mounted) return;
     final item = Item.fromFirestore(itemDoc);
 
+    // for message
     if (type == 'message') {
       final fromUserId = data['fromUserId'];
       Navigator.of(context).push(
@@ -122,6 +129,8 @@ class NotificationsScreen extends StatelessWidget {
             );
           }
 
+
+          // all notifiaction display
           return ListView.builder(
             itemCount: docs.length,
             itemBuilder: (context, index) {

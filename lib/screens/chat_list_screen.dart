@@ -68,7 +68,6 @@ class ChatListScreen extends StatelessWidget {
 
               return FutureBuilder<DocumentSnapshot>(
 
-                // irems access koi
                 future: FirebaseFirestore.instance.collection('items').doc(itemId).get(),
                 builder: (context, itemSnapshot) {
                   String itemTitle = 'Item';
@@ -76,6 +75,7 @@ class ChatListScreen extends StatelessWidget {
                     final itemData = itemSnapshot.data!.data() as Map<String, dynamic>;
                     itemTitle = itemData['title'] ?? 'Item';
                   }
+
                 // display all of my chats
                   return ListTile(
                     leading: const CircleAvatar(

@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('ReGive'),
         actions: [
+          //notification part
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('notifications')
@@ -76,6 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
               final unreadCount = snapshot.data?.docs.length ?? 0;
               return Stack(
                 children: [
+
+                  //notification icon
                   IconButton(
                     icon: const Icon(Icons.notifications_none),
                     tooltip: 'Notifications',
@@ -104,6 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
+
+          //chat list screen
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline),
             tooltip: 'Messages',
