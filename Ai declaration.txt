@@ -1,0 +1,164 @@
+------------------------------------------------------------
+1. AI TOOLS USED (check all that apply)
+------------------------------------------------------------
+[] None
+[x] ChatGPT
+[ ] GitHub Copilot
+[ ] Google Gemini
+[ ] Claude
+[ ] Cursor
+
+
+------------------------------------------------------------
+2. PURPOSE OF AI USE (check all that apply)
+------------------------------------------------------------
+[x] Learning/understanding concepts
+[x] Debugging my code
+[x] Generating code snippets
+[x] Writing text content
+[ ] Design/styling ideas
+[ ] Image generation
+[ ] Other: 
+
+------------------------------------------------------------
+3. DESCRIPTION OF AI USE
+------------------------------------------------------------
+I used AI tools (primarily ChatGPT and Claude) for the following purposes:
+
+Learning & Understanding Concepts:
+
+Understood Flutter widget architecture and state management
+
+Understood Firestore real-time database structure and queries
+
+Learned how to implement real-time chat systems with Firebase
+
+Understood location services and geolocation integration
+
+Learned notification system architecture with Firestore
+
+
+Debugging Assistance:
+
+Fixed authentication error handling issues
+
+Resolved Firestore query optimization problems
+
+Debugged real-time update issues in chat system
+
+Resolved image caching and loading issues
+
+
+Design & Architecture:
+
+Project structure organization (MVVM pattern)
+
+Firebase Security Rules design
+
+Database schema design for Firestore
+
+UI/UX design patterns
+
+Navigation flow design
+
+------------------------------------------------------------
+4. AI-ASSISTED SECTIONS
+------------------------------------------------------------
+File: lib/screens/chat_screen.dart
+Section: Real-time chat implementation, message sending, notification creation
+
+File: lib/screens/chat_list_screen.dart
+Section: Chat list display, Firestore queries, navigation
+
+File: lib/screens/notifications_screen.dart
+Section: Notification system, read/unread status, navigation
+
+File: lib/screens/home_screen.dart
+Section: Location services, nearby filter
+
+File: lib/screens/forgot_password_screen.dart
+Section: Password reset implementation, error handling
+
+File: lib/services/auth_service.dart
+Section: Authentication logic, error handling, user management
+
+File: lib/services/firestore_service.dart
+Section: CRUD operations, real-time queries, data management
+
+
+------------------------------------------------------------
+5. EXPLANATION OF AI-ASSISTED FEATURES
+------------------------------------------------------------
+1. Authentication System (Login, Signup, Forgot Password)
+
+AI helped understand Firebase Authentication flow
+
+Debugged error handling for various authentication scenarios
+
+Implemented password reset with email link
+
+Learned session management techniques
+
+2. Real-time Chat System
+
+AI explained Firestore real-time streams
+
+Helped design deterministic chat IDs
+
+Assisted with message bubble UI implementation
+
+Showed how to create notifications for new messages
+
+3. Notification System
+
+AI explained Firestore queries for notifications
+
+Helped implement read/unread status
+
+Assisted with "Mark All Read" functionality
+
+Showed how to integrate navigation from notifications
+
+4. Location & Nearby Features
+
+AI explained GPS location services
+
+Helped implement distance calculation
+
+Assisted with nearby filtering logic
+
+Showed how to handle location permissions
+
+5. Item Management System
+
+AI helped design Firestore data structure
+
+Assisted with CRUD operations
+
+Helped implement search and filter functionality
+
+Showed how to handle image uploads
+
+------------------------------------------------------------
+6. DECLARATION
+------------------------------------------------------------
+I declare that:
+
+✅ This disclosure is complete and accurate
+
+✅ I understand all code in my submission
+
+✅ I can explain and modify my work if asked
+
+✅ I take full responsibility for my submission
+
+✅ AI was used as a learning tool, not as a replacement for understanding
+
+✅ All code has been reviewed and modified to fit my application
+
+✅ I have implemented, tested, and understand each feature
+
+Signature: Mahidur Rahman
+
+Date: 22/8/2026
+
